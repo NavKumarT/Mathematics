@@ -3,18 +3,26 @@
 #include<linux/module.h>
 #include<linux/sched/signal.h>
 
-struct task_struct *task;
-struct list_head *list;
+void dfs_search(struct task_struct *task)
+{
+	struct task_struct *next;
+	struct list_head *list;
+	printk("%d   %d   %d	%s\n",task->pid,task->parent->pid,task->state,task->comm);
+	
+	list_for_each(list, &task->children)
+	{
+		next = list_entry(list, struct task_struct, sibling);
+		
+		dfs_search(next);
+	}
+	
+}
 
 int module_entry(void)
 {
 	printk(KERN_INFO "Loading kernel module...");
 	printk(" PID \tState \tCMD\n");
-	list_for_each(list, &init_task->children)
-	{
-		task = list_entry(list, struct task_struct, sibling);
-		printk("%5d   %4ld   %s\n",Task->pid,Task->state,Task->comm);
-	}
+	dfs_search(&init_task);
 	return 0;
 }
 
@@ -28,6 +36,3 @@ module_exit(module_Exit);
 MODULE_DESCRIPTION("Process details Module");
 MODULE_AUTHOR("SGG");
 MODULE_LICENSE("GPL");
-
-
-
